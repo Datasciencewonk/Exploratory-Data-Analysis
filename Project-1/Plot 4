@@ -1,1 +1,67 @@
+#Easiest way to call the limited set is subset via rows and will need to reset types of data and names of cols accordingly.
+epcall <- fread("household_power_consumption.txt", colClasses="character",skip = 66637, nrows = 2880)
+
+#Need to reset column names 
+ColNames <- c("Date", "Time", "Global_active_power" ,"Global_reactive_power", "Voltage", "Global_intensity","Sub_metering_1", "Sub_metering_2", "Sub_metering_3")
+setnames(epcall,ColNames)
+
+## Changing Data Types as per instructions (all 3 combined is what it took?)
+epcall$newDate <- paste(epcall$Date,epcall$Time)
+epcall$newDate <- dmy_hms(epcall$newDate)
+epcall$newDate <-strptime(epcall$newDate, "%d/%m/%Y %H:%M:%S")
+
+## Reclassifying the data, set up for plots
+epcall$Global_active_power <-sapply(epcall$Global_active_power, as.numeric)
+
+epcall$Global_reactive_power <-sapply(epcall$Global_reactive_power, as.numeric)
+
+epcall$Voltage <- sapply(epcall$Voltage, as.numeric)
+
+epcall$Global_intensity <- sapply(epcall$Global_intensity, as.numeric)
+
+epcall$Sub_metering_1 <- sapply(epcall$Sub_metering_1, as.numeric)
+
+epcall$Sub_metering_2 <- sapply(epcall$Sub_metering_2, as.numeric)
+
+epcall$Sub_metering_3 <- sapply(epcall$Sub_metering_3, as.numeric)
+
+##PLOT 4
+
+## Plot Setup
+png("plot4.png",width=600,height=600)
+
+opar <- par(no.readonly=TRUE)
+par(mfrow=c(2,2))
+
+##Plot 4a
+plot(epcall$newDate, epcall$Global_active_power, type="l", ylab = "Global Active Power", xlab = "")
+
+axis(1,c(epcall$newDate[1],mean(epcall$newDate),epcall$newDate[2880]), labels=c("Thu","Fri","Sat"))
+
+##Plot 4b
+plot(epcall$newDate, epcall$Voltage, type = "l",  ylab ="Voltage", xlab = "datetime")
+
+axis(1,c(epcall$newDate[1],mean(epcall$newDate),epcall$newDate[2880]), labels=c("Thu","Fri","Sat"))
+
+
+##Plot 4c
+plot(epcall$newDate, epcall$Sub_metering_1, type="l", ylab = "Energy sub metering", xlab = "")
+
+axis(1,c(epcall$newDate[1],mean(epcall$newDate),epcall$newDate[2880]), labels=c("Thu","Fri","Sat"))
+
+
+lines(epcall$newDate, epcall$Sub_metering_2, col="red")
+lines(epcall$newDate, epcall$Sub_metering_3, col = "blue")
+
+legendText <- c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3")
+
+legend("topright",  legendText,  lty = c(1,1),  lwd = c(2.5, 2.5), col=c("black","red", "blue"),  cex = 0.75, bty = "n")                       
+
+##Plot 4d
+plot(epcall$newDate, epcall$Global_reactive_power, type ="l", xlab = "datetime", ylab = "Global_reactive_power")
+
+axis(1,c(epcall$newDate[1],mean(epcall$newDate),epcall$newDate[2880]),labels = c("Thu","Fri","Sat"))
+
+par(opar)
+graphics.off()
 
